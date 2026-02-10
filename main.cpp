@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <unordered_set>
+#include <deque>
 #include <cmath>
 #include <string>
 #include <sstream>
@@ -102,7 +103,48 @@ public:
     }
 };
 
-vector<vector<Process>> batches;
+class Batch{
+private:
+    vector<Process> processes;
+    deque<int> ready;
+    int runningProcessIndex;
+public:
+    Batch(){
+        this->runningProcessIndex = -1;
+    }
+    void addProcess(Process &process){
+        processes.push_back(process);
+        ready.push_back((int)processes.size()-1);
+    }
+    bool isFull() const{
+        return processes.size() >= BATCH_CAPACITY;
+    }
+    int processesCount(){
+        return processes.size();
+    }
+    Process& getProcess(int index){
+        return processes[index];
+    }
+    int getRunningProcessIndex(){
+        return runningProcessIndex;
+    }
+    void cleanRunningProcessIndex(){
+        runningProcessIndex = -1;
+    }
+
+    deque<int>& getReadyDeque(){
+        return ready;
+    }
+    bool hasReadyProcess() const {
+        return !ready.empty();
+    }
+    void startNextProcess() {
+    runningProcessIndex = ready.front();
+    ready.pop_front();
+    }
+};
+
+vector<Batch> batches;
 
 void registerProcesses(int numProcesses);
 void createProcess(string name,char operation,int operand1,int operand2,int estimatedTime,int id);
@@ -110,8 +152,8 @@ char validateOperation(char operation);
 int validateSecondOperand(int operand2,char operation);
 int validateEstimatedTime(int estimatedTime);
 void printData();
-string formatActualBatch(int batchesCont);
-string formatActualProcess(int batchesCont, int processCont);
+string formatActualBatch(Batch& batch);
+string formatActualProcess(Process& process);
 vector<string> printFinishedProcesses();
 void renderScreenBlocks(int pendingBatchesNumber, int globalTime,const string& actualBatch,
                         const string& actualProcess,const vector<string>& finishedProcesses);
@@ -170,16 +212,14 @@ void registerProcesses(int numProcesses){
     }
 }
 
-/*This function creates a new "process" object each time it is called by the function "registerProcesses()"
-and it is appended to the last batch, if there are no batches yet,
-or the last batch already contains 4 processes, it creates a new batch first*/
 
 void createProcess(string name,char operation,int operand1,int operand2,int estimatedTime,int id){
     Process process(name,operation,operand1,operand2,estimatedTime,id);
-    if (batches.empty() || batches.back().size() == BATCH_CAPACITY){
-        batches.push_back(vector<Process>());
+
+    if (batches.empty() || batches.back().isFull()){
+        batches.push_back(Batch());
     }
-    batches.back().push_back(process);
+    batches.back().addProcess(process);
 }
 
 char validateOperation(char operation){
@@ -216,76 +256,62 @@ int validateEstimatedTime(int estimatedTime){
 void printData(){
     int globalTime = 0;
     int batchesCont = 0;
-    int processCont = 0;
+    int processIndex = 0;
+    string printBatch,printProcess;
     int const totalBatches = batches.size();
-    string actualBatch, actualProcess;
-    vector<string>finishedProcesses;
+    vector<string> finishedProcesses = printFinishedProcesses();
 
-    finishedProcesses = printFinishedProcesses(); //just the two first lines
-
-    while (batchesCont < totalBatches){
+    while(batchesCont < totalBatches){
         int pendingBatchesNumber = totalBatches - batchesCont - 1;
-        Process& thisProcess = batches[batchesCont][processCont];
+        Batch& actualBatch = batches[batchesCont];
 
-        while (thisProcess.getRemainingTime() > 0){
-            clearScreen();
-            actualBatch = formatActualBatch(batchesCont);
-            actualProcess = formatActualProcess(batchesCont,processCont);
-            renderScreenBlocks(pendingBatchesNumber,globalTime,actualBatch,actualProcess,finishedProcesses);
-            sleep_for(seconds(1));
-            globalTime++;
-            thisProcess.tickOneSecond();
+        if(actualBatch.hasReadyProcess()){
+            actualBatch.cleanRunningProcessIndex();
+            actualBatch.startNextProcess();
+            processIndex = actualBatch.getRunningProcessIndex();
+            Process& actualProcess = actualBatch.getProcess(processIndex);
 
-        }
-        finishedProcesses.push_back(to_string(batches[batchesCont][processCont].getId())+"     "+
-                                    to_string(batches[batchesCont][processCont].getOperand1())+" "+
-                                    string(1,batches[batchesCont][processCont].getOperation())+" "+
-                                    to_string(batches[batchesCont][processCont].getOperand2())+"     "+
-                                    batches[batchesCont][processCont].getResult()+"     "+
-                                    to_string(batchesCont+1));
-        clearScreen();
-        actualProcess = formatActualProcess(batchesCont,processCont);
-        actualBatch = formatActualBatch(batchesCont);
-        renderScreenBlocks(pendingBatchesNumber,globalTime,actualBatch,actualProcess,finishedProcesses);
-        processCont++;
-
-        if (processCont == batches[batchesCont].size()){
-            processCont = 0;
-            finishedProcesses.push_back("---- End Batch "+to_string(batchesCont+1)+" ----");
-            batchesCont++;
-            if (batchesCont < totalBatches){
-                finishedProcesses.push_back("---- Start Batch "+to_string(batchesCont+1)+" ----");
+            while (actualProcess.getRemainingTime() > 0){
+                clearScreen();
+                printBatch = formatActualBatch(actualBatch);
+                printProcess = formatActualProcess(actualProcess);
+                renderScreenBlocks(pendingBatchesNumber,globalTime,printBatch, printProcess,finishedProcesses);
+                sleep_for(seconds(1));
+                globalTime++;
+                actualProcess.tickOneSecond();
             }
+
+            finishedProcesses.push_back(to_string(actualProcess.getId())+"     "+
+                                    to_string(actualProcess.getOperand1())+" "+
+                                    string(1,actualProcess.getOperation())+" "+
+                                    to_string(actualProcess.getOperand2())+"     "+
+                                    actualProcess.getResult()+"     "+
+                                    to_string(batchesCont+1));
+            clearScreen();
+            printBatch = formatActualBatch(actualBatch);
+            printProcess = formatActualProcess(actualProcess);
+            renderScreenBlocks(pendingBatchesNumber,globalTime,printBatch, printProcess,finishedProcesses);
+        }else{
+            batchesCont++;
         }
     }
 }
 
-
-string formatActualBatch(int batchesCont){
+string formatActualBatch(Batch& batch){
+    const deque<int>& readyDeque = batch.getReadyDeque();
     ostringstream oss;
     oss << "Current Batch\n";
     oss << "Name           EMT\n";
-    for (int i = 0; i < batches[batchesCont].size(); i++){
-        oss << batches[batchesCont][i].getName() << "    "
-            << batches[batchesCont][i].getEstimatedTime() << "\n";
+    for (int i : readyDeque){
+        Process& process = batch.getProcess(i);
+
+        oss << process.getName() << "    " << process.getEstimatedTime() << "\n";
     }
     return oss.str();
 }
 
-/*vector<string> printActualBatch(int batchesCont){
-    vector<string>actualBatch;
-    actualBatch.push_back("Current Batch");
-    actualBatch.push_back("Name:   EMT: ");
 
-    for (int i=0;i<batches[batchesCont].size();i++){
-        actualBatch.push_back(batches[batchesCont][i].getName()+"  "+
-                              to_string(batches[batchesCont][i].getEstimatedTime()));
-    }
-    return actualBatch;
-}*/
-
-string formatActualProcess(int batchesCont, int processCont){
-    const Process& process = batches[batchesCont][processCont];
+string formatActualProcess(Process& process){
     ostringstream oss;
     oss << "Actual Process\n";
     oss << "Name: " << process.getName() << "\n";
@@ -297,23 +323,6 @@ string formatActualProcess(int batchesCont, int processCont){
     oss << "RT:   " << process.getRemainingTime() << " s\n";
     return oss.str();
 }
-
-/*
-vector<string> printActualProcess(int batchesCont, int processCont){
-    vector<string>actualProcess;
-    const Process& process = batches[batchesCont][processCont];
-
-    actualProcess.push_back("Actual Process");
-    actualProcess.push_back("Name: "+process.getName());
-    actualProcess.push_back("Ope: "+to_string(process.getOperand1())+" "+
-                            string(1,process.getOperation())+" "+
-                            to_string(process.getOperand2()));
-    actualProcess.push_back("EMT: "+to_string(process.getEstimatedTime())+" s");
-    actualProcess.push_back("ID: "+to_string(process.getId()));
-    actualProcess.push_back("ET: "+to_string(process.getElapsedTime())+" s");
-    actualProcess.push_back("RT: "+to_string(process.getRemainingTime())+" s");
-    return actualProcess;
-}*/
 
 vector<string> printFinishedProcesses(){
     vector<string>finishedProcesses;
@@ -330,34 +339,17 @@ void renderScreenBlocks(int pendingBatchesNumber, int globalTime,const string& a
     cout << "Global time: " << globalTime << " s\n";
     cout << "---------------------------------------------------------" << endl;
     cout << actualBatch << "\n";
+    cout << "---------------------------------------------------------" << endl;
     cout << actualProcess << "\n";
+    cout << "---------------------------------------------------------" << endl;
 
-    for (const string&line : finishedProcesses){
+    for (const string& line : finishedProcesses){
         cout << line << endl;
     }
 
     cout << "---------------------------------------------------------" << endl;
 }
 
-/*
-void renderScreen(int pendingBatchesNumber,int globalTime,const vector<string> &actualBatch,
-                  const vector<string> &actualProcess, const vector<string> &finishedProcesses){
-   int maxLines = max(max(actualBatch.size(),actualProcess.size()),finishedProcesses.size());
-   int const columnASize = 25, columnBSize = 35,columnCSize=30;
-   string lineA,lineB,lineC;
-   cout << "\n---------------------------------------------------------" << endl;
-    cout << "Number of remaining batches: " << pendingBatchesNumber << endl;
-    cout << "Global time: " << globalTime << " s" << endl << endl;
-
-    for(int i=0;i<maxLines;i++){
-        lineA = (i<actualBatch.size()) ? actualBatch[i] : "";
-        lineB = (i<actualProcess.size()) ? actualProcess[i] : "";
-        lineC = (i<finishedProcesses.size()) ? finishedProcesses[i] : "";
-        cout << setw(columnASize) << left << lineA << setw(columnBSize) << left << lineB
-        << setw(columnCSize) << left << lineC << endl;
-    }
-    cout << "---------------------------------------------------------" << endl;
-}*/
 
 void clearScreen(){
     cout << "\033[2J\033[H";
