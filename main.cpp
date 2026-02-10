@@ -12,7 +12,7 @@
 #include <algorithm>
 
 //Constant
-#define BATCH_CAPACITY 4
+#define BATCH_CAPACITY 5
 
 using namespace std;
 using namespace std::this_thread;
@@ -110,11 +110,11 @@ char validateOperation(char operation);
 int validateSecondOperand(int operand2,char operation);
 int validateEstimatedTime(int estimatedTime);
 void printData();
-vector<string> printActualBatch(int batchesCont);
-vector<string> printActualProcess(int batchesCont, int processCont);
+string formatActualBatch(int batchesCont);
+string formatActualProcess(int batchesCont, int processCont);
 vector<string> printFinishedProcesses();
-void renderScreen(int pendingBatchesNumber,int globalTime,const vector<string> &actualBatch,
-                  const vector<string> &actualProcess, const vector<string> &finishedProcesses);
+void renderScreenBlocks(int pendingBatchesNumber, int globalTime,const string& actualBatch,
+                        const string& actualProcess,const vector<string>& finishedProcesses);
 void clearScreen();
 
 int main()
@@ -218,8 +218,7 @@ void printData(){
     int batchesCont = 0;
     int processCont = 0;
     int const totalBatches = batches.size();
-    vector<string>actualBatch;
-    vector<string>actualProcess;
+    string actualBatch, actualProcess;
     vector<string>finishedProcesses;
 
     finishedProcesses = printFinishedProcesses(); //just the two first lines
@@ -227,12 +226,12 @@ void printData(){
     while (batchesCont < totalBatches){
         int pendingBatchesNumber = totalBatches - batchesCont - 1;
         Process& thisProcess = batches[batchesCont][processCont];
-        actualBatch = printActualBatch(batchesCont);
 
         while (thisProcess.getRemainingTime() > 0){
-            actualProcess = printActualProcess(batchesCont,processCont);
             clearScreen();
-            renderScreen(pendingBatchesNumber, globalTime, actualBatch, actualProcess, finishedProcesses);
+            actualBatch = formatActualBatch(batchesCont);
+            actualProcess = formatActualProcess(batchesCont,processCont);
+            renderScreenBlocks(pendingBatchesNumber,globalTime,actualBatch,actualProcess,finishedProcesses);
             sleep_for(seconds(1));
             globalTime++;
             thisProcess.tickOneSecond();
@@ -245,8 +244,9 @@ void printData(){
                                     batches[batchesCont][processCont].getResult()+"     "+
                                     to_string(batchesCont+1));
         clearScreen();
-        actualProcess = printActualProcess(batchesCont, processCont);
-        renderScreen(pendingBatchesNumber, globalTime, actualBatch, actualProcess, finishedProcesses);
+        actualProcess = formatActualProcess(batchesCont,processCont);
+        actualBatch = formatActualBatch(batchesCont);
+        renderScreenBlocks(pendingBatchesNumber,globalTime,actualBatch,actualProcess,finishedProcesses);
         processCont++;
 
         if (processCont == batches[batchesCont].size()){
@@ -260,7 +260,19 @@ void printData(){
     }
 }
 
-vector<string> printActualBatch(int batchesCont){
+
+string formatActualBatch(int batchesCont){
+    ostringstream oss;
+    oss << "Current Batch\n";
+    oss << "Name           EMT\n";
+    for (int i = 0; i < batches[batchesCont].size(); i++){
+        oss << batches[batchesCont][i].getName() << "    "
+            << batches[batchesCont][i].getEstimatedTime() << "\n";
+    }
+    return oss.str();
+}
+
+/*vector<string> printActualBatch(int batchesCont){
     vector<string>actualBatch;
     actualBatch.push_back("Current Batch");
     actualBatch.push_back("Name:   EMT: ");
@@ -270,8 +282,23 @@ vector<string> printActualBatch(int batchesCont){
                               to_string(batches[batchesCont][i].getEstimatedTime()));
     }
     return actualBatch;
+}*/
+
+string formatActualProcess(int batchesCont, int processCont){
+    const Process& process = batches[batchesCont][processCont];
+    ostringstream oss;
+    oss << "Actual Process\n";
+    oss << "Name: " << process.getName() << "\n";
+    oss << "Ope:  " << process.getOperand1() << " " << process.getOperation() << " "
+    << process.getOperand2() << "\n";
+    oss << "EMT:  " << process.getEstimatedTime() << " s\n";
+    oss << "ID:   " << process.getId() << "\n";
+    oss << "ET:   " << process.getElapsedTime() << " s\n";
+    oss << "RT:   " << process.getRemainingTime() << " s\n";
+    return oss.str();
 }
 
+/*
 vector<string> printActualProcess(int batchesCont, int processCont){
     vector<string>actualProcess;
     const Process& process = batches[batchesCont][processCont];
@@ -286,7 +313,7 @@ vector<string> printActualProcess(int batchesCont, int processCont){
     actualProcess.push_back("ET: "+to_string(process.getElapsedTime())+" s");
     actualProcess.push_back("RT: "+to_string(process.getRemainingTime())+" s");
     return actualProcess;
-}
+}*/
 
 vector<string> printFinishedProcesses(){
     vector<string>finishedProcesses;
@@ -295,6 +322,24 @@ vector<string> printFinishedProcesses(){
     return finishedProcesses;
 }
 
+void renderScreenBlocks(int pendingBatchesNumber, int globalTime,const string& actualBatch,
+                        const string& actualProcess,const vector<string>& finishedProcesses)
+{
+    cout << "---------------------------------------------------------" << endl;
+    cout << "Number of remaining batches: " << pendingBatchesNumber << endl;
+    cout << "Global time: " << globalTime << " s\n";
+    cout << "---------------------------------------------------------" << endl;
+    cout << actualBatch << "\n";
+    cout << actualProcess << "\n";
+
+    for (const string&line : finishedProcesses){
+        cout << line << endl;
+    }
+
+    cout << "---------------------------------------------------------" << endl;
+}
+
+/*
 void renderScreen(int pendingBatchesNumber,int globalTime,const vector<string> &actualBatch,
                   const vector<string> &actualProcess, const vector<string> &finishedProcesses){
    int maxLines = max(max(actualBatch.size(),actualProcess.size()),finishedProcesses.size());
@@ -312,7 +357,7 @@ void renderScreen(int pendingBatchesNumber,int globalTime,const vector<string> &
         << setw(columnCSize) << left << lineC << endl;
     }
     cout << "---------------------------------------------------------" << endl;
-}
+}*/
 
 void clearScreen(){
     cout << "\033[2J\033[H";
