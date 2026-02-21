@@ -302,6 +302,7 @@ string formatActualBatch(Batch& batch){
     ostringstream oss;
     oss << "Current Batch\n";
     oss << "Name           EMT\n";
+
     for (int i : readyDeque){
         Process& process = batch.getProcess(i);
 
