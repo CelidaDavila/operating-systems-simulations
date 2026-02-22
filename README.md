@@ -10,11 +10,11 @@ operating-systems-simulations
 - Program 1: Batch Processing Simulation (batches of max 5 processes).
 - Program 2: Batch Processing with Multiprogramming (keyboard control: I/E/P/C).
 
-## \Requirements
+## Requirements
 - C++17 compiler (g++, clang++, or MSVC)
 - Console/terminal
 
-## \How to Run (under 5 minutes)
+## How to Run (under 5 minutes)
 Windows (g++ / MinGW)
 bash
 g++ -std=c++17 main.cpp -o main.exe
