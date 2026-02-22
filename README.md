@@ -9,12 +9,8 @@
 ## 
 
 ## This repository contains two programs:
-
-## 
-
-## \- \*\*Program 1:\*\* Batch Processing Simulation (batches of max 5 processes).
-
-## \- \*\*Program 2:\*\* Batch Processing with Multiprogramming (keyboard control: I/E/P/C).
+- Program 1: Batch Processing Simulation (batches of max 5 processes).
+- Program 2: Batch Processing with Multiprogramming (keyboard control: I/E/P/C).
 
 ## 
 
