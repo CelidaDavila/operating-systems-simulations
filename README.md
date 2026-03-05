@@ -14,7 +14,7 @@ operating-systems-simulations
 - C++17 compiler (g++, clang++, or MSVC)
 - Console/terminal
 
-## How to Run (under 5 minutes)
+## How to Run
 Windows (g++ / MinGW)
 bash
 g++ -std=c++17 main.cpp -o main.exe
