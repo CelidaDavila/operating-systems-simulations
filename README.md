@@ -5,6 +5,7 @@ operating-systems-simulations
 ## 
 
 ## Simulations for the Operating Systems course (console-based, C++).
+Console-based simulation of operating system process management concepts.
 
 ## This repository contains two programs:
 - Program 1: Batch Processing Simulation (batches of max 5 processes).
