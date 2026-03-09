@@ -89,6 +89,7 @@ public:
 
     void printData(){
         clearScreen();
+        cout << "'I' = interrumpt 'E' = error 'P' = pause 'C'= continue " << endl;
         cout << "GLOBAL TIME: " << globalClock << endl;
         cout << "Number of processes (New state): " << newProcesses.size() << endl;
         printReadyProcesses();
