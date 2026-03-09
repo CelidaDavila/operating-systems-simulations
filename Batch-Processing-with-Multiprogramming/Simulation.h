@@ -54,8 +54,6 @@ public:
         string printBatch,printProcess;
         int const totalBatches = batches.size();
         vector<FinishedProcess> finishedProcesses;
-        /*
-        vector<string> finishedProcesses = printFinishedProcesses();*/
 
         while(batchesCont < totalBatches){
             int pendingBatchesNumber = totalBatches - batchesCont - 1;
@@ -66,15 +64,6 @@ public:
                 actualBatch.startNextProcess();
                 processIndex = actualBatch.getRunningProcessIndex();
 
-                /*while (actualProcess.getRemainingTime() > 0){
-                    clearScreen();
-                    printBatch = formatActualBatch(actualBatch);
-                    printProcess = formatActualProcess(actualProcess);
-                    renderScreenBlocks(pendingBatchesNumber,globalTime,printBatch, printProcess,finishedProcesses);
-                    sleep_for(seconds(1));
-                    globalTime++;
-                    actualProcess.tickOneSecond();
-                }*/
 
                 while (actualBatch.getProcess(processIndex).getRemainingTime() > 0){
                         Process& actualProcess = actualBatch.getProcess(processIndex);
@@ -144,13 +133,6 @@ public:
         oss << "RT:   " << process.getRemainingTime() << " s\n";
         return oss.str();
     }
-    /*
-    vector<string> printFinishedProcesses(){
-        vector<string>finishedProcesses;
-        finishedProcesses.push_back("Finished Processes");
-        finishedProcesses.push_back("ID    OPE        RES   BatchNumber");
-        return finishedProcesses;
-    }*/
 
     void renderScreenBlocks(int pendingBatchesNumber, int globalTime,const string& actualBatch,
                             const string& actualProcess,const vector<FinishedProcess>& finishedProcesses)
