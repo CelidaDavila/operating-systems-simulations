@@ -1,4 +1,4 @@
-\*Program 1 – Batch Processing Simulation\*
+**Program 1 – Batch Processing Simulation**
 
 
 
