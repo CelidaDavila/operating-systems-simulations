@@ -1,6 +1,6 @@
 **Program 3:First Come Fisrt Served**
 
---
+---
 
 \#How It Works
 
@@ -19,7 +19,7 @@ Processes are generated internally without input required:
 Each generated process is added to the system in the New state, waiting to enter memory.
 
 
-
+---
 
 \#Execution Model
 
