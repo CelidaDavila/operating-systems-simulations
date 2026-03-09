@@ -3,6 +3,7 @@
 ## 
 
 ## Simulations for the Operating Systems course (console-based, C++).
+Console-based simulation of operating system process management concepts.
 
 ## This repository contains three programs:
 
@@ -15,8 +16,12 @@
 * C++17 compiler (g++, clang++, or MSVC)
 * Console/terminal
 
+<<<<<<< HEAD
 ## How to Run (under 5 minutes)
 
+=======
+## How to Run
+>>>>>>> 199554588d9d329bd528b5e0b8e5433865af5119
 Windows (g++ / MinGW)
 bash
 g++ -std=c++17 main.cpp -o main.exe
