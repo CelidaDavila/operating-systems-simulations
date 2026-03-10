@@ -2,22 +2,16 @@
 #define SYSTEM_H_INCLUDED
 
 #include <iostream>
+#include <iomanip>
 #include <queue>
 #include <vector>
 #include <thread>
 #include <chrono>
 #include <conio.h>
 #include "Process.h"
+#include "Util.h"
 
 #define SYSTEM_CAPACITY 5
-
-#ifdef _WIN32
-#define CLEAR "cls"
-#elif defined(unix)||defined(__unix__)||defined(__unix)||defined(__APPLE__)||defined(__MACH__)
-#define CLEAR "clear"
-#else
-#error "SO no soportado para limpiar pantalla"
-#endif
 
 using namespace std;
 using namespace std::this_thread;
@@ -103,16 +97,16 @@ public:
     void printReadyProcesses(){
         queue<Process> temporalQueue = readyProcesses;
 
-        cout << "-------------------------------------" << endl;
+        printSmallSeparator();
         cout << "READY PROCESSES QUEUE" << endl;
-        cout << "ID  EMT  ET\n";
+        cout << left << setw(8)  << "ID" << setw(12) << "EMT"<< setw(12) << "ET" << endl;
         while(!temporalQueue.empty()){
             Process process = temporalQueue.front();
-            cout << process.getId() << "   "<< process.getEstimatedTime() << "   "
-                 << process.getElapsedTime() << endl;
+            cout << left << setw(8)  << process.getId() << setw(12) << process.getEstimatedTime()
+             << setw(12) << process.getElapsedTime() << endl;
             temporalQueue.pop();
         }
-        cout << "-------------------------------------" << endl;
+        printSmallSeparator();
     }
 
     void printRunningProcess(){
@@ -125,37 +119,40 @@ public:
         } else {
             cout << "RUNNING PROCESS: none" << endl;
         }
-        cout << "-------------------------------------" << endl;
     }
 
     void printFinishedProcesses(){
-        cout << "-------------------------------------" << endl;
+        printSmallSeparator();
         cout << "FINISHED PROCESSES QUEUE" << endl;
-        cout << "ID    OPE        RES         State" << endl;
+        cout << left << setw(8)  << "ID" << setw(18) << "OPERATION" << setw(12) << "RESULT"
+         << setw(12) << "STATE" << endl;
+
         for(Process& fp : finishedProcesses){
-            cout << fp.getId() << "  ";
-            if("Error" == fp.getStatus()){
-                cout << fp.getOperand1() << " " << fp.getOperation() << " "
-                << fp.getOperand2() << "                 " << fp.getStatus() << endl;
-            }else{
-                cout << fp.getOperand1() << " " << fp.getOperation() << " "
-                << fp.getOperand2() <<"     "<< fp.getResult() <<  "        "
-                << fp.getStatus() << endl;
+            stringstream op, res;
+
+            op << fp.getOperand1() << " " << fp.getOperation() << " " << fp.getOperand2();
+
+            if (fp.getStatus() == "Error") {
+                res << "-";
+            } else {
+                res << fp.getResult();
             }
+
+            cout << left << setw(8)  << fp.getId() << setw(20) << op.str() << setw(12) << res.str()
+                 << setw(12) << fp.getStatus() << endl;
         }
-        cout << "-------------------------------------" << endl;
     }
 
     void printBlockedProcesses(){
-        cout << "-------------------------------------" << endl;
+        printSmallSeparator();
         cout << "BLOCKED PROCESSES" << endl;
-        cout << "ID   Blocked Time Elapsed" << endl;
+        cout << left << setw(8)  << "ID" << setw(20) << "BLOCKED TIME" << endl;
 
-        for(Process& bp : blockedProcesses){
-            cout << bp.getId() << "    " << bp.getBlockedTime() << endl;
-        }
+        for (Process& bp : blockedProcesses) {
+            cout << left << setw(8)  << bp.getId() << setw(20) << bp.getBlockedTime() << endl;
+            }
 
-        cout << "-------------------------------------" << endl;
+        printSmallSeparator();
     }
 
     void tick(){
@@ -220,7 +217,7 @@ public:
 
     void updateBlockedProcesses(){
         int i=0;
-        while(i < blockedProcesses.size()){
+        while(i < (int)blockedProcesses.size()){
             blockedProcesses[i].setBlockedTime(blockedProcesses[i].getBlockedTime() + 1);
 
             if(blockedProcesses[i].getBlockedTime() >= 8){
@@ -237,21 +234,22 @@ public:
     void printAllInfo(){
         clearScreen();
         cout << "ALL FINISHED PROCESSES" << endl;
-        cout << "-------------------------------------" << endl;
-        cout << "ID  ArrivalTime  FinishTime  ReturnTime  ResponseTime  WaitingTime  ServiceTime   State" << endl;
-        for(Process& process : finishedProcesses){
-            cout << process.getId() << "       " << process.getArrivalTime() << "            "
-            << process.getFinishTime() << "            " << process.getReturnTime() << "            "
-            << process.getResponseTime() << "            " << process.getWaitingTime()
-            << "            " << process.getServiceTime() << "         "
-            << process.getStatus() << endl;
+        printLongSeparator();
+        cout << left << setw(8)  << "ID" << setw(10) << "Arrival" << setw(10) << "Finish"
+            << setw(14) << "Return" << setw(14) << "Response" << setw(10) << "Waiting"
+            << setw(10) << "Service" << setw(12) << "State" << endl;
+
+        printLongSeparator();
+
+        for (Process& process : finishedProcesses) {
+            cout << left << setw(8)  << process.getId() << setw(10) << process.getArrivalTime()
+                 << setw(10) << process.getFinishTime() << setw(14) << process.getReturnTime()
+                 << setw(14) << process.getResponseTime() << setw(10) << process.getWaitingTime()
+                 << setw(10) << process.getServiceTime() << setw(12) << process.getStatus() << endl;
         }
-        cout << "-------------------------------------" << endl;
+        printLongSeparator();
     }
 
-    void clearScreen(){
-        system(CLEAR);
-    }
 
 };
 
