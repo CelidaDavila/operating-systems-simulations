@@ -56,12 +56,14 @@ public:
                     actualProcess.tickOneSecond();
                 }
 
-                finishedProcesses.push_back(to_string(actualProcess.getId())+"     "+
-                                        to_string(actualProcess.getOperand1())+" "+
-                                        string(1,actualProcess.getOperation())+" "+
-                                        to_string(actualProcess.getOperand2())+"     "+
-                                        actualProcess.getResult()+"     "+
-                                        to_string(batchesCont+1));
+                ostringstream row;
+                row << left << setw(6) << actualProcess.getId()
+                    << setw(12) << (to_string(actualProcess.getOperand1()) + " " +
+                    string(1, actualProcess.getOperation()) + " " +
+                    to_string(actualProcess.getOperand2())) << setw(10) << actualProcess.getResult()
+                    << setw(12) << (batchesCont + 1);
+
+                finishedProcesses.push_back(row.str());
                 clearScreen();
                 //last print
                 printBatch = formatActualBatch(actualBatch);
@@ -77,13 +79,15 @@ public:
     string formatActualBatch(Batch& batch){
         const deque<int>& readyDeque = batch.getReadyDeque();
         ostringstream oss;
+
         oss << "Current Batch\n";
-        oss << "Name           EMT\n";
+        oss << left << setw(15) << "Name" << right << setw(6) << "EMT" << "\n";
 
         for (int i : readyDeque){
             Process& process = batch.getProcess(i);
 
-            oss << process.getName() << "    " << process.getEstimatedTime() << "\n";
+            oss << left << setw(15) << process.getName()
+                << right << setw(6) << process.getEstimatedTime() << "\n";
         }
         return oss.str();
     }
@@ -91,21 +95,31 @@ public:
 
     string formatActualProcess(Process& process){
         ostringstream oss;
+
         oss << "Actual Process\n";
-        oss << "Name: " << process.getName() << "\n";
-        oss << "Ope:  " << process.getOperand1() << " " << process.getOperation() << " "
-        << process.getOperand2() << "\n";
-        oss << "EMT:  " << process.getEstimatedTime() << " s\n";
-        oss << "ID:   " << process.getId() << "\n";
-        oss << "ET:   " << process.getElapsedTime() << " s\n";
-        oss << "RT:   " << process.getRemainingTime() << " s\n";
+        oss << left << setw(6) << "Name:" << process.getName() << "\n";
+        oss << left << setw(6) << "Ope:"
+            << process.getOperand1() << " "
+            << process.getOperation() << " "
+            << process.getOperand2() << "\n";
+        oss << left << setw(6) << "EMT:"  << process.getEstimatedTime() << " s\n";
+        oss << left << setw(6) << "ID:"   << process.getId() << "\n";
+        oss << left << setw(6) << "ET:"   << process.getElapsedTime() << " s\n";
+        oss << left << setw(6) << "RT:"   << process.getRemainingTime() << " s\n";
+
         return oss.str();
     }
 
     vector<string> printFinishedProcesses(){
-        vector<string>finishedProcesses;
+        vector<string> finishedProcesses;
+        ostringstream header;
+
+        header << left << setw(6)  << "ID" << setw(12) << "OPE" << setw(10) << "RES"
+               << setw(12) << "BatchNumber";
+
         finishedProcesses.push_back("Finished Processes");
-        finishedProcesses.push_back("ID    OPE        RES   BatchNumber");
+        finishedProcesses.push_back(header.str());
+
         return finishedProcesses;
     }
 
