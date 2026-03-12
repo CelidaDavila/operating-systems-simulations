@@ -2,6 +2,7 @@
 #define SIMULATION_H_INCLUDED
 
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <string>
 #include <sstream>
@@ -109,14 +110,17 @@ public:
     string formatActualBatch(Batch& batch){
         const deque<int>& readyDeque = batch.getReadyDeque();
         ostringstream oss;
-        oss << "Current Batch\n";
-        oss << "ID   EMT    ET\n";
+        oss << "Current Batch\n"; oss << left << setw(6) << "ID" << setw(8) << "EMT"
+        << setw(8) << "ET" << "\n";
 
         for (int i : readyDeque){
             Process& process = batch.getProcess(i);
 
-            oss << process.getId() << "    " <<process.getEstimatedTime() << "s    " <<
-            process.getElapsedTime() << "s\n";
+            oss << left
+                << setw(6) << process.getId()
+                << setw(8) << (to_string(process.getEstimatedTime()) + "s")
+                << setw(8) << (to_string(process.getElapsedTime()) + "s")
+                << "\n";
         }
         return oss.str();
     }
@@ -125,12 +129,13 @@ public:
     string formatActualProcess(Process& process){
         ostringstream oss;
         oss << "Actual Process\n";
-        oss << "ID:   " << process.getId() << "\n";
-        oss << "Ope:  " << process.getOperand1() << " " << process.getOperation() << " "
-        << process.getOperand2() << "\n";
-        oss << "EMT:  " << process.getEstimatedTime() << " s\n";
-        oss << "ET:   " << process.getElapsedTime() << " s\n";
-        oss << "RT:   " << process.getRemainingTime() << " s\n";
+        oss << left << setw(6) << "ID:"  << process.getId() << "\n";
+        oss << left << setw(6) << "Ope:" << process.getOperand1() << " "
+            << process.getOperation() << " " << process.getOperand2() << "\n";
+        oss << left << setw(6) << "EMT:" << process.getEstimatedTime() << " s\n";
+        oss << left << setw(6) << "ET:"  << process.getElapsedTime() << " s\n";
+        oss << left << setw(6) << "RT:"  << process.getRemainingTime() << " s\n";
+
         return oss.str();
     }
 
@@ -147,23 +152,24 @@ public:
         cout << actualProcess << "\n";
         cout << "---------------------------------------------------------" << endl;
         cout << "Finished Processes" << endl;
-        cout << "ID    OPE        RES    BatchNumber   State" << endl;
+        cout << left << setw(6)  << "ID" << setw(16) << "OPE" << setw(12) << "RES"
+             << setw(14) << "BatchNumber" << setw(12) << "State" << endl;
 
         for (const FinishedProcess& fp : finishedProcesses){
-            cout << fp.id << "  ";
-            if(fp.error){
-                cout <<"******************" << fp.state << "*****************" << endl;
-            }else{
-                cout << fp.operand1 << " " << fp.operation <<" " << fp.operand2
-                <<"     "<< fp.result << "        "<< fp.batchNumber << "        " << fp.state << endl;
+            if (fp.error){
+                cout << left << setw(6)  << fp.id << setw(16) << "ERROR" << setw(12) << "-----"
+                     << setw(14) << fp.batchNumber << setw(12) << fp.state << endl;
+            } else {
+                string operation = to_string(fp.operand1) + " " +
+                                   string(1, fp.operation) + " " +
+                                   to_string(fp.operand2);
+
+                cout << left << setw(6)  << fp.id << setw(16) << operation
+                     << setw(12) << fp.result << setw(14) << fp.batchNumber << setw(12)
+                     << fp.state << endl;
             }
         }
         cout << "---------------------------------------------------------" << endl;
-    }
-
-
-    void clearScreen(){
-        system("cls");
     }
 
     bool controlKbhit(Batch& actualBatch,int processIndex){
@@ -196,6 +202,10 @@ public:
                 break;
             }
         return false;
+    }
+
+    void clearScreen(){
+        system("cls");
     }
 
 };

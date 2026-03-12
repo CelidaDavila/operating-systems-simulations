@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include <string>
-#include <unordered_set>
 #include <cstdlib>
 #include <ctime>
 #include "Simulation.h"
@@ -15,9 +14,7 @@ Simulation simulation;
 void registerProcesses(int numProcesses);
 int randInRange(int lowBound, int highBound);
 void createProcess(char operation,int operand1,int operand2,int estimatedTime,int id);
-char validateOperation(char operation);
 int validateSecondOperand(int operand2,char operation);
-int validateEstimatedTime(int estimatedTime);
 
 int main()
 {
