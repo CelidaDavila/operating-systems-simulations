@@ -132,7 +132,7 @@ This separation improves readability, scalability, and maintainability.
 
 \#Performance Considerations
 
-The simulation runs in real time using `std::this\_thread::sleep\_for(1s)`.
+The simulation runs in real time using `std::this\_thread::sleep\_for(1s)`
 
 The algorithm complexity is linear relative to the total execution time of all processes, since each process is updated once per tick.
 
