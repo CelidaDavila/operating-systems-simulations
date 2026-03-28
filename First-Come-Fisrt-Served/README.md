@@ -52,6 +52,9 @@ P – Pause the simulation
 
 C – Continue the simulation
 
+N - Add new process
+
+B - Show PCB (Process Control Block)
 
 ---
 
