@@ -336,7 +336,7 @@ public:
                  << setw(10) << process.getFinishTime()
                  << setw(14) << process.getReturnTime()
                  << setw(14) << process.getResponseTime()
-                 << setw(10) << process.getWaitingTime()
+                 << setw(10) << "---"
                  << setw(10) << process.getServiceTime()
                  << setw(12) << process.getStatus() << endl;
         }
@@ -350,7 +350,7 @@ public:
                  << setw(10) << process.getFinishTime()
                  << setw(14) << process.getReturnTime()
                  << setw(14) << process.getResponseTime()
-                 << setw(10) << process.getWaitingTime()
+                 << setw(10) << globalClock-process.getArrivalTime()-process.getElapsedTime()//process.getWaitingTime()
                  << setw(10) << process.getServiceTime()
                  << setw(12) << process.getStatus() << endl;
         }
@@ -361,7 +361,7 @@ public:
                  << setw(10) << runningProcess.getFinishTime()
                  << setw(14) << runningProcess.getReturnTime()
                  << setw(14) << runningProcess.getResponseTime()
-                 << setw(10) << runningProcess.getWaitingTime()
+                 << setw(10) << globalClock-runningProcess.getArrivalTime()-runningProcess.getElapsedTime()//runningProcess.getWaitingTime()
                  << setw(10) << runningProcess.getServiceTime()
                  << setw(12) << runningProcess.getStatus() << endl;
         }
@@ -369,7 +369,7 @@ public:
         for (Process& process : blockedProcesses) {
             cout << left << setw(8)  << process.getId() << setw(10) << process.getArrivalTime()
                  << setw(10) << process.getFinishTime() << setw(14) << process.getReturnTime()
-                 << setw(14) << process.getResponseTime() << setw(10) << process.getWaitingTime()
+                 << setw(14) << process.getResponseTime() << setw(10) << globalClock-process.getArrivalTime()-process.getElapsedTime()
                  << setw(10) << process.getServiceTime() << setw(12) << process.getStatus() << endl;
         }
 
